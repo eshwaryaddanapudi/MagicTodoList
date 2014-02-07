@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <script src="jquery.js"></script>
+        <style>
+            @media SCREEN and (min-width:640px) {
+                /*#tableItems button:hover {
+                    background: #9ed72f;
+                }*/
+            
+                #btnCleartodo:hover {
+                    background-color: #f00;
+                    border-radius: 50px;
+                }
+            
+                #btnCleartodo {
+                    background-color: #ffd800;
+                    border-radius: 15px;
+                }
+            
+                #btnSavetodo {
+                    background-color: #9ed72f;
+                    -webkit-border-top-left-radius: 15px;
+                    -webkit-border-top-right-radius: 15px;
+                    -moz-border-radius: 5px 15px 0px 0px;
+                    border-top-left-radius: 15px;
+                    border-top-right-radius: 15px;
+                    border-bottom-left-radius: 15px;
+                    border-bottom-right-radius: 15px;
+                }
+            
+                /*#tableItems .button:hover {
+                    background-color: #f00;
+                    border-radius: 10px;
+                }
+            
+                #tableItems .button {
+                    background-color: #ffd800;
+                    border-radius: 10px;
+                }*/
+                #tableItems tr:nth-child(even) {
+                    background-color: #ffd800;
+                    color: #444;
+                }
+                #tableItems tr:nth-child(odd) {
+                    background-color:#9ed72f;
+                    color: #444;
+                }
+            #tableItems tr td button{
+                    background-color: #569add;
+                    color: #444;
+                    border-radius: 15px;
+                }
+            
+            }
+            @media SCREEN and (max-width:640px) {
+            
+            #btnCleartodo {
+                    background-color:#5576e2;
+                    border-radius: 15px;
+                }
+            
+                #btnSavetodo {
+                    background-color: #7edab3;
+                    -webkit-border-top-left-radius: 15px;
+                    -webkit-border-top-right-radius: 15px;
+                    -moz-border-radius: 5px 15px 0px 0px;
+                    border-top-left-radius: 15px;
+                    border-top-right-radius: 15px;
+                    border-bottom-left-radius: 15px;
+                    border-bottom-right-radius: 15px;
+                }
+                #tableItems tr:nth-child(even) {
+                    background-color: #7edab3;
+                    color: #444;
+                }
+                #tableItems tr:nth-child(odd) {
+                    background-color: #569add;
+                    color: #444;
+                }
+            
+            }
+            
+            
+        </style>
+        <script>
+            var storage = window.localStorage;
+            //read the element
+            var todoValue = '';
+            var storelist = [];
+            var storeItem = '';
+            var records = '';
+            var todoKey = '';
+            var clickedBtn = '';
+            $(document).ready(function () {
+                //read the value from textbox on click of the button
+                $("#btnSavetodo").click(function () {
+                    todoValue = $("input:text[name=todoElement]").val();
+                    if (todoValue == null || todoValue == '' || todoValue == undefined) {
+                        return;
+                    }
+                    todoKey = generateUUID();
+                    storeItem = [todoKey, todoValue];
+                    // reassign the existing local storage values
+                    if (storage.getItem("records") != null || storage.getItem("records") != undefined) {
+                        var getcurrentLocal = storage.getItem("records");
+                        var currentList = JSON.parse(getcurrentLocal);
+                        storelist = currentList;
+                    }
+                    storelist.push(storeItem);
+                    storage.setItem("records", JSON.stringify(storelist));
+                    //load it on screen
+                    var clickToDelete = "Delete";
+                    $("#tableItems").append("<tr><td>" + todoValue +
+                                                         "</td><td><input type='button' id=" +
+                                                         "'" + todoKey + "'" + "value=" + "'" + clickToDelete + "'" + " name=" + "'" + todoKey + "'" + "/></td></tr>");
+
+                });
+
+                var indiValue = '';
+                var indiKey = '';
+                var indi = [];
+                var combiVal = '';
+
+
+
+                refreshDisplayTodo();
+
+
+                function refreshDisplayTodo() {
+
+                    var totalsaved = storage.getItem("records");
+                    $("#tableItems").html("");
+                    if (totalsaved != null) {
+                        var converted = JSON.parse(totalsaved);
+                        for (test in converted) {
+                            combiVal = converted[test];
+                            indiKey = combiVal[0];
+                            indiValue = combiVal[1];
+                            var clickToDelete = "Delete";
+                            $("#tableItems").append("<tr><td>" + indiValue +
+                                                         "</td><td><input type='button' id=" +
+                                                         "'" + indiKey + "'" + "value=" + "'" + clickToDelete + "'" + " name=" + "'" + indiKey + "'" + "/></td></tr>");
+                        }
+                    } else {
+                        $("#tableItems").html("");
+                    }
+                }
+
+                $("#btnCleartodo").click(function () {
+                    storage.clear();
+                    refreshDisplayTodo();
+                    alert("local storage cleared");
+
+                });
+
+
+
+                $("input").click(function (e) {
+                    var idClicked = e.target.id;
+                    var nameClicked = e.target.name;
+
+                    if (idClicked === nameClicked) {
+                        deleteSelectedKey(idClicked);
+                    }
+
+
+                });
+
+                function deleteSelectedKey(toRemoveKey) {
+                    //find the value from the JSON that is in the local storage
+                    var totalsaved = storage.getItem("records");
+                    if (totalsaved != null) {
+                        var converted = JSON.parse(totalsaved);
+                        storelist = converted;
+                        for (test in converted) {
+                            combiVal = converted[test];
+                            if (combiVal[0] == toRemoveKey) {
+                                storeItem = [combiVal[0], combiVal[1]];
+                                storelist.splice(test,1)
+                                //storelist.pop(storeItem);
+                                storage.setItem("records", JSON.stringify(storelist));
+                                
+                                refreshDisplayTodo();
+                                break;
+                            }
+                        }
+
+
+
+                        //refreshDisplayTodo();
+                        //for (test in converted) {
+                        //    combiVal = converted[test];
+                        //    indiKey = combiVal[0];
+                        //    indiValue = combiVal[1];
+                        //    if (toRemoveKey == indiKey) {
+
+                        //    }
+                        //}
+                    }
+                }
+            });
+
+
+            //function to generate unique guid
+            function generateUUID() {
+                var d = new Date().getTime();
+                var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    var r = (d + Math.random() * 16) % 16 | 0;
+                    d = Math.floor(d / 16);
+                    return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+                });
+                return uuid;
+            };
+        </script>
+
+
+    </head>
+    <body>
+        <h3>Welcome mate!!!</h3>
+        <form id="ToDoListForm">
+            <table>
+                <tr>
+                    <td>
+                        <input type="text" name="todoElement" />
+                    </td>
+                    <td>
+                        <input type="button" id="btnSavetodo" value="Save" />
+                    </td>
+                    <td>
+                        <input type="button" id="btnCleartodo" value="Clear All" />
+                    </td>
+                    <td>
+
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <form id="gotItems">
+            <table id="tableItems">
+
+            </table>
+        </form>
+        <p id="notification"></p>
+    </body>
+</html>
